@@ -1,17 +1,19 @@
 import { Dropbox, DropboxResponse, file_requests, files } from "dropbox"
 import { accessToken } from "../../config"
 import { IFileService } from "../type"
-import { ICreateFileDto } from "../dto/createFileDto"
-import { IFilePreviewDto } from "../dto/filePreviewDto"
-import { IUpdateFileDto } from "../dto/updateFileDto"
-import { IGetFileDto } from "../dto/getFileDto"
-import { IDeleteFileDto } from "../dto/deleteFileDto"
-import { ICreateFolderDto } from "../dto/createFolderDto"
-import { IFolderPreviewDto } from "../dto/folderPreviewDto"
-import { IUpdateFolderDto } from "../dto/updateFolderDto"
-import { IGetFolderDto } from "../dto/getFolderDto"
-import { IGetFoldersDto } from "../dto/getFoldersDto"
-import { IDeleteFolderDto } from "../dto/deleteFolderDto"
+import {
+    ICreateFileDto,
+    IFilePreviewDto,
+    IUpdateFileDto,
+    IGetFileDto,
+    IDeleteFileDto,
+    ICreateFolderDto,
+    IFolderPreviewDto,
+    IUpdateFolderDto,
+    IGetFolderDto,
+    IGetFoldersDto,
+    IDeleteFolderDto
+} from "../dto"
 
 export class DropBoxFileService implements IFileService {
     private readonly client: Dropbox
