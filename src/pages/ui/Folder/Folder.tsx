@@ -1,5 +1,5 @@
 import React from 'react'
-import { View } from '@gluestack-ui/themed'
+import { ScrollView, View } from '@gluestack-ui/themed'
 import { ToolBar } from '@/widgets/tool'
 import { FileLists } from '@/widgets/content'
 import { useFolder } from './useFolder'
@@ -7,9 +7,9 @@ import { useFolder } from './useFolder'
 export const Folder = () => {
     useFolder()
     return (
-        <View>
+        <ScrollView>
             <ToolBar />
             <FileLists />
-        </View>
+        </ScrollView>
     )
 }

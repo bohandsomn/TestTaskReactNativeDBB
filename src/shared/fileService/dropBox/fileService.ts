@@ -1,5 +1,5 @@
 // import { Dropbox, DropboxResponse, file_requests, files } from 'dropbox'
-import axios, { AxiosError, AxiosInstance, isAxiosError } from 'axios'
+import axios, { AxiosInstance, isAxiosError } from 'axios'
 import { accessToken, baseURL } from '../../config'
 import { IFileService } from '../type'
 import {
@@ -74,19 +74,10 @@ export class DropBoxFileService implements IFileService {
     }
 
     async createFolder(dto: ICreateFolderDto): Promise<IFolderPreviewDto> {
-        try {
-            console.log({ dto })
-            const data = this.mapCreateFolderDto(dto)
-            console.log({ data })
-            const response = (await this.client.post('files/create_folder_v2', data)).data
-            console.log({ response })
-            const folderPreviewDto = this.mapFolderResponse(response)
-            console.log({ folderPreviewDto })
-            return folderPreviewDto
-        } catch (error) {
-            console.log({ errorMessage: (error as AxiosError).message })
-            throw error
-        }
+        const data = this.mapCreateFolderDto(dto)
+        const response = (await this.client.post('files/create_folder_v2', data)).data
+        const folderPreviewDto = this.mapFolderResponse(response)
+        return folderPreviewDto
     }
 
     async updateFolder(dto: IUpdateFolderDto): Promise<IFolderPreviewDto> {
