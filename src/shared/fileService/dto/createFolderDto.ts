@@ -1,3 +1,3 @@
 export interface ICreateFolderDto {
-    readonly pathToFolder: string
+    readonly pathToFolder: string[]
 }

@@ -1,6 +1,7 @@
-import { Dropbox, DropboxResponse, file_requests, files } from "dropbox"
-import { accessToken } from "../../config"
-import { IFileService } from "../type"
+// import { Dropbox, DropboxResponse, file_requests, files } from 'dropbox'
+import axios, { AxiosError, AxiosInstance, isAxiosError } from 'axios'
+import { accessToken, baseURL } from '../../config'
+import { IFileService } from '../type'
 import {
     ICreateFileDto,
     IFilePreviewDto,
@@ -13,57 +14,84 @@ import {
     IGetFolderDto,
     IGetFoldersDto,
     IDeleteFolderDto
-} from "../dto"
+} from '../dto'
 
 export class DropBoxFileService implements IFileService {
-    private readonly client: Dropbox
+    private readonly client: AxiosInstance
 
     constructor() {
-        this.client = new Dropbox({ accessToken })
+        // this.client = new Dropbox({ accessToken })
+        this.client = axios.create({
+            baseURL,
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
     }
 
     async createFile(dto: ICreateFileDto): Promise<IFilePreviewDto> {
-        const arg = this.mapCreateFileDto(dto)
-        const response = await this.client.fileRequestsCreate(arg)
-        const filePreviewDto = this.mapFileResponse(response)
-        return filePreviewDto
+        try {
+            console.log({ dto })
+            const data = this.mapCreateFileDto(dto)
+            console.log({ data })
+            const response = (await this.client.post('file_requests/create', data)).data
+            console.log({ response })
+            const filePreviewDto = this.mapFileResponse(response)
+            console.log({ filePreviewDto })
+            return filePreviewDto
+        } catch (error) {
+            if (isAxiosError(error)) {
+                console.log(error.name)
+                console.log(error.message)
+            }
+            throw error
+        }
     }
 
     async updateFile(dto: IUpdateFileDto): Promise<IFilePreviewDto> {
-        const arg = this.mapUpdateFileDto(dto)
-        const response = await this.client.fileRequestsUpdate(arg)
+        const data = this.mapUpdateFileDto(dto)
+        const response = (await this.client.post('file_requests/update', data)).data
         const filePreviewDto = this.mapFileResponse(response)
         return filePreviewDto
     }
 
     async getFile(dto: IGetFileDto): Promise<IFilePreviewDto> {
-        const arg = this.mapGetFileDto(dto)
-        const response = await this.client.fileRequestsGet(arg)
+        const data = this.mapGetFileDto(dto)
+        const response = (await this.client.post('file_requests/get', data)).data
         const filePreviewDto = this.mapFileResponse(response)
         return filePreviewDto
     }
 
     async getFiles(): Promise<IFilePreviewDto[]> {
-        const response = await this.client.fileRequestsList()
+        const response = (await this.client.post('file_requests/list')).data
         const files = this.mapFilesResponse(response)
         return files
     }
 
     async deleteFile(dto: IDeleteFileDto): Promise<void> {
-        const arg = this.mapDeleteFileDto(dto)
-        await this.client.fileRequestsDelete(arg)
+        const data = this.mapDeleteFileDto(dto)
+        await this.client.post('file_requests/delete', data)
     }
 
     async createFolder(dto: ICreateFolderDto): Promise<IFolderPreviewDto> {
-        const arg = this.mapCreateFolderDto(dto)
-        const response = await this.client.filesCreateFolderV2(arg)
-        const folderPreviewDto = this.mapFolderResponse(response)
-        return folderPreviewDto
+        try {
+            console.log({ dto })
+            const data = this.mapCreateFolderDto(dto)
+            console.log({ data })
+            const response = (await this.client.post('files/create_folder_v2', data)).data
+            console.log({ response })
+            const folderPreviewDto = this.mapFolderResponse(response)
+            console.log({ folderPreviewDto })
+            return folderPreviewDto
+        } catch (error) {
+            console.log({ errorMessage: (error as AxiosError).message })
+            throw error
+        }
     }
 
     async updateFolder(dto: IUpdateFolderDto): Promise<IFolderPreviewDto> {
-        const arg = this.mapUpdateFolderDto(dto)
-        const response = await this.client.filesMoveV2(arg)
+        const data = this.mapUpdateFolderDto(dto)
+        const response = (await this.client.post('files/move_v2', data)).data
         const folderPreviewDto = this.mapFolderRelocationResponse(response)
         return {
             ...folderPreviewDto,
@@ -72,25 +100,25 @@ export class DropBoxFileService implements IFileService {
     }
 
     async getFolder(dto: IGetFolderDto): Promise<IFolderPreviewDto> {
-        const arg = this.mapGetFolderDto(dto)
-        const response = await this.client.filesGetMetadata(arg)
-        const folderPreviewDto = this.mapFolderResponse(response as any)
+        const data = this.mapGetFolderDto(dto)
+        const response = (await this.client.post('files/get_metadata', data)).data
+        const folderPreviewDto = this.mapFolderResponse(response)
         return folderPreviewDto
     }
 
     async getFolders(dto: IGetFoldersDto): Promise<IFolderPreviewDto[]> {
-        const arg = this.mapGetFoldersDto(dto)
-        const response = await this.client.filesListFolder(arg)
+        const data = this.mapGetFoldersDto(dto)
+        const response = (await this.client.post('files/list_folder', data)).data
         const foldersPreviewDto = this.mapFoldersResponse(response)
         return foldersPreviewDto
     }
 
     async deleteFolder(dto: IDeleteFolderDto): Promise<void> {
-        const arg = this.mapDeleteFolderDto(dto)
-        await this.client.filesDeleteV2(arg)
+        const data = this.mapDeleteFolderDto(dto)
+        await this.client.post('files/delete_v2', data)
     }
 
-    private mapCreateFileDto(dto: ICreateFileDto): file_requests.CreateFileRequestArgs {
+    private mapCreateFileDto(dto: ICreateFileDto) {
         const title = dto.fileName
         const destination = this.mapPath(dto.pathToFolder)
         return {
@@ -99,7 +127,7 @@ export class DropBoxFileService implements IFileService {
         }
     }
 
-    private mapUpdateFileDto(dto: IUpdateFileDto): file_requests.UpdateFileRequestArgs {
+    private mapUpdateFileDto(dto: IUpdateFileDto) {
         const id = dto.fileId
         const title = dto.fileName
         return {
@@ -108,28 +136,28 @@ export class DropBoxFileService implements IFileService {
         }
     }
 
-    private mapGetFileDto(dto: IGetFileDto): file_requests.GetFileRequestArgs {
+    private mapGetFileDto(dto: IGetFileDto) {
         const id = dto.fileId
         return {
             id,
         }
     }
 
-    private mapDeleteFileDto(dto: IDeleteFileDto): file_requests.DeleteFileRequestArgs {
+    private mapDeleteFileDto(dto: IDeleteFileDto) {
         const id = dto.fileId
         return {
             ids: [id],
         }
     }
 
-    private mapCreateFolderDto(dto: ICreateFolderDto): files.CreateFolderArg {
-        const path = this.mapPath(dto.pathToFolder)
+    private mapCreateFolderDto(dto: ICreateFolderDto) {
+        const path = dto.pathToFolder.join('/')
         return {
             path,
         }
     }
 
-    private mapUpdateFolderDto(dto: IUpdateFolderDto): files.RelocationArg {
+    private mapUpdateFolderDto(dto: IUpdateFolderDto) {
         const fromPath = this.mapPath(dto.fromPath)
         const toPath = this.mapPath(dto.toPath)
         return {
@@ -138,74 +166,88 @@ export class DropBoxFileService implements IFileService {
         }
     }
 
-    private mapGetFolderDto(dto: IGetFolderDto): files.GetMetadataArg {
+    private mapGetFolderDto(dto: IGetFolderDto) {
         const path = this.mapPath(dto.pathToFolder)
         return {
             path,
         }
     }
 
-    private mapGetFoldersDto(dto: IGetFoldersDto): files.ListFolderArg {
+    private mapGetFoldersDto(dto: IGetFoldersDto) {
         const path = this.mapPath(dto.pathToParentFolder)
         return {
             path,
         }
     }
 
-    private mapDeleteFolderDto(dto: IDeleteFolderDto): files.DeleteArg {
+    private mapDeleteFolderDto(dto: IDeleteFolderDto) {
         const path = this.mapPath(dto.pathToFolder)
         return {
             path,
         }
     }
 
-    private mapFileResponse(response: DropboxResponse<file_requests.FileRequest>): IFilePreviewDto {
-        const fileId = response.result.id
-        const fileName = response.result.title
+    private mapFileResponse(response: any): IFilePreviewDto {
+        const fileId = this.mapId(response.id)
+        const fileName = response.title
+        const filePath = response.destination
         return {
             fileId,
             fileName,
+            filePath,
         }
     }
 
-    private mapFolderResponse(response: DropboxResponse<files.FileMetadataReference | files.FolderMetadataReference>): IFolderPreviewDto
-    private mapFolderResponse(response: DropboxResponse<files.CreateFolderResult>): IFolderPreviewDto
-    private mapFolderResponse(response: DropboxResponse<files.FileMetadataReference | files.FolderMetadataReference | files.CreateFolderResult>): IFolderPreviewDto {
-        const data = (response as Partial<DropboxResponse<files.CreateFolderResult>>).result?.metadata
-            ? (response as DropboxResponse<files.CreateFolderResult>).result.metadata
-            : (response as DropboxResponse<files.FileMetadataReference | files.FolderMetadataReference>).result
-        const folderId = data?.id
+    private mapFolderResponse(response: any): IFolderPreviewDto {
+        const data = response?.metadata
+            ? response.metadata
+            : response
+        const folderId = this.mapId(data?.id || '')
         const folderName = data.name
+        const folderPath = data.path_display
         return {
             folderId,
             folderName,
+            folderPath,
         }
     }
 
-    private mapFolderRelocationResponse(response: DropboxResponse<files.RelocationResult>): Omit<IFolderPreviewDto, 'folderId'> {
-        const folderName = response.result.metadata.name
+    private mapFolderRelocationResponse(response: any): Omit<IFolderPreviewDto, 'folderId'> {
+        const folderName = response.metadata.name
+        const folderPath = response.metadata.path_display
         return {
             folderName,
+            folderPath,
         }
     }
 
-    private mapFilesResponse(response: DropboxResponse<file_requests.ListFileRequestsResult>): IFilePreviewDto[] {
-        const files = response.result.file_requests.map((file): IFilePreviewDto => ({
-            fileId: file.id,
+    private mapFilesResponse(response: any): IFilePreviewDto[] {
+        const files = response.file_requests.map((file: any): IFilePreviewDto => ({
+            fileId: this.mapId(file.id),
             fileName: file.title,
+            filePath: file.destination,
         }))
         return files
     }
 
-    private mapFoldersResponse(response: DropboxResponse<files.ListFolderResult>): IFolderPreviewDto[] {
-        const folders = (response.result.entries as any).map((entity: files.FileMetadataReference | files.FolderMetadataReference): IFolderPreviewDto => ({
-            folderId: entity?.id,
+    private mapFoldersResponse(response: any): IFolderPreviewDto[] {
+        const folders = response.entries.map((entity: any): IFolderPreviewDto => ({
+            folderId: this.mapId(entity?.id || ''),
             folderName: entity.name,
+            folderPath: entity.path_display,
         }))
         return folders
     }
 
     private mapPath(path: string): string {
+        if (!path) {
+            return path
+        }
         return '/' + path
+    }
+
+    private mapId(id: string): string {
+        const parsedId = id.split('id:')[1]
+        return parsedId || id
     }
 }

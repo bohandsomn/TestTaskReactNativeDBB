@@ -1,4 +1,4 @@
-import { IFilePreviewDto } from "../dto"
+import { IFilePreviewDto } from '../dto'
 
 export function isFilePreview(data: unknown): data is IFilePreviewDto {
     const fileId = (data as Partial<IFilePreviewDto>).fileId

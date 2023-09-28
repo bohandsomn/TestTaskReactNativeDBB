@@ -1,7 +1,9 @@
 import { IGlobalState } from '@/entities/store'
-import { IFilePreviewDto } from '@/shared'
+import { ICreateFileDto, IDeleteFileDto, IFilePreviewDto, IGetFilesDto } from '@/shared'
 
 export interface IFilesModel {
     files: IGlobalState<IFilePreviewDto[]>
-    getFiles(): void
+    getFiles(dto: IGetFilesDto): void
+    addFile(dto: ICreateFileDto): void
+    removeFile(dto: IDeleteFileDto): void
 }

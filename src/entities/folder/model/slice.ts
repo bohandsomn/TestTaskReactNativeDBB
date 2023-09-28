@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { IFolderPreviewDto } from '@/shared'
 import { IGlobalState } from '../../store'
-import { getFoldersAction } from './asyncThunk'
+import { addFolderAction, getFoldersAction, removeFolderAction } from './asyncThunk'
 
 const initialState: IGlobalState<IFolderPreviewDto[]> = {
     data: null,
@@ -25,6 +25,26 @@ const folders = createSlice({
                 state.isLoading = false
             })
             .addCase(getFoldersAction.rejected, (state, action) => {
+                state.data = null
+                state.error = action.payload as string
+                state.isLoading = false
+            })
+            .addCase(addFolderAction.fulfilled, (state, action) => {
+                state.data?.push(action.payload)
+                state.error = null
+                state.isLoading = false
+            })
+            .addCase(addFolderAction.rejected, (state, action) => {
+                state.data = null
+                state.error = action.payload as string
+                state.isLoading = false
+            })
+            .addCase(removeFolderAction.fulfilled, (state, action) => {
+                state.data = state.data?.filter((folder) => folder.folderPath !== action.payload.pathToFolder) || null
+                state.error = null
+                state.isLoading = false
+            })
+            .addCase(removeFolderAction.rejected, (state, action) => {
                 state.data = null
                 state.error = action.payload as string
                 state.isLoading = false

@@ -1,2 +1,2 @@
 export * from './notification'
-export * from './type'
+export type { INotification } from './type'

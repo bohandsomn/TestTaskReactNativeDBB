@@ -48,17 +48,18 @@ export interface IGetColorsResultDto {
 }
 
 export enum Placement {
-    BOTTOM_RIGHT = "bottom-right",
-    BOTTOM = "bottom",
-    TOP = "top",
-    TOP_RIGHT = "top-right",
-    TOP_LEFT = "top-left",
-    BOTTOM_LEFT = "bottom-left",
+    TOP = 'top',
+    TOP_RIGHT = 'top right',
+    TOP_LEFT = 'top left',
+    BOTTOM = 'bottom',
+    BOTTOM_LEFT = 'bottom left',
+    BOTTOM_RIGHT = 'bottom right',
 }
 
 export enum NotificationType {
-    INFO,
-    SUCCESS,
-    PENDING,
-    FAIL,
+    FAIL = 'error',
+    WARNING = 'warning',
+    SUCCESS = 'success',
+    INFO = 'info',
+    ATTENTION = 'attention',
 }

@@ -1,4 +1,4 @@
-import { IFolderPreviewDto } from "../dto"
+import { IFolderPreviewDto } from '../dto'
 
 export function isFolderPreview(data: unknown): data is IFolderPreviewDto {
     const folderId = (data as Partial<IFolderPreviewDto>).folderId

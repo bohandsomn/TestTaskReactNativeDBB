@@ -1,8 +1,6 @@
-import { useToast } from 'native-base'
+import { Toast, ToastDescription, VStack, useToast } from '@gluestack-ui/themed'
 import {
     IBroadcastNotificationOptions,
-    IGetColorsDto,
-    IGetColorsResultDto,
     INotification,
     INotificationId,
     INotificationOptions,
@@ -17,7 +15,7 @@ export class Notification implements INotification {
         private readonly options?: Partial<
             Pick<INotificationOptions, 'duration'>
         >,
-    ) { }
+    ) {}
 
     info(message: string): INotificationId
     info(
@@ -27,7 +25,7 @@ export class Notification implements INotification {
     info(options: Partial<INotificationOptions>): INotificationId
     info(
         message: string | Partial<INotificationOptions>,
-        options?: Partial<INotificationOptions>
+        options?: Partial<INotificationOptions>,
     ): INotificationId {
         const adaptedOptions = this.adaptOptions(message as any, options as any)
         return this.notify(adaptedOptions, NotificationType.INFO)
@@ -41,7 +39,7 @@ export class Notification implements INotification {
     success(options: Partial<INotificationOptions>): INotificationId
     success(
         message: string | Partial<INotificationOptions>,
-        options?: Partial<INotificationOptionsWithoutMessage>
+        options?: Partial<INotificationOptionsWithoutMessage>,
     ): INotificationId {
         const adaptedOptions = this.adaptOptions(message as any, options as any)
         return this.notify(adaptedOptions, NotificationType.SUCCESS)
@@ -55,10 +53,10 @@ export class Notification implements INotification {
     pending(options: Partial<INotificationOptions>): INotificationId
     pending(
         message: string | Partial<INotificationOptions>,
-        options?: Partial<INotificationOptionsWithoutMessage>
+        options?: Partial<INotificationOptionsWithoutMessage>,
     ): INotificationId {
         const adaptedOptions = this.adaptOptions(message as any, options as any)
-        return this.notify(adaptedOptions, NotificationType.PENDING)
+        return this.notify(adaptedOptions, NotificationType.ATTENTION)
     }
 
     fail(message: string): INotificationId
@@ -69,7 +67,7 @@ export class Notification implements INotification {
     fail(options: Partial<INotificationOptions>): INotificationId
     fail(
         message: string | Partial<INotificationOptions>,
-        options?: Partial<INotificationOptionsWithoutMessage>
+        options?: Partial<INotificationOptionsWithoutMessage>,
     ): INotificationId {
         const adaptedOptions = this.adaptOptions(message as any, options as any)
         return this.notify(adaptedOptions, NotificationType.FAIL)
@@ -85,18 +83,21 @@ export class Notification implements INotification {
             type: NotificationType.INFO,
             ...options,
         }
-        const { textColor, bgColor } = this.getColors({
-            type: defaultOptions.type,
-        })
         messages.map((message, index) => {
             setTimeout(
                 () =>
                     this.toastService.show({
-                        description: message,
                         duration: defaultOptions.duration,
                         placement: defaultOptions.placement,
-                        color: textColor,
-                        backgroundColor: bgColor,
+                        render: () => (
+                            <Toast action={defaultOptions.type}>
+                                <VStack space="xs">
+                                    <ToastDescription>
+                                        {message}
+                                    </ToastDescription>
+                                </VStack>
+                            </Toast>
+                        ),
                     }),
                 defaultOptions.duration * index,
             )
@@ -127,14 +128,18 @@ export class Notification implements INotification {
         if (typeof message === 'string') {
             defaultOptions.message = message
             if (typeof options === 'object' && options !== null) {
-                defaultOptions.duration = options.duration ?? defaultOptions.duration
-                defaultOptions.placement = options.placement ?? defaultOptions.placement
+                defaultOptions.duration =
+                    options.duration ?? defaultOptions.duration
+                defaultOptions.placement =
+                    options.placement ?? defaultOptions.placement
             }
         } else if (typeof message === 'object' && message !== null) {
             const options = message
-            defaultOptions.duration = options.duration ?? defaultOptions.duration
+            defaultOptions.duration =
+                options.duration ?? defaultOptions.duration
             defaultOptions.message = options.message ?? defaultOptions.message
-            defaultOptions.placement = options.placement ?? defaultOptions.placement
+            defaultOptions.placement =
+                options.placement ?? defaultOptions.placement
         }
         return defaultOptions
     }
@@ -143,42 +148,16 @@ export class Notification implements INotification {
         options: INotificationOptions,
         type: NotificationType,
     ): INotificationId {
-        const { textColor, bgColor } = this.getColors({
-            type,
-        })
         return this.toastService.show({
-            description: options.message,
             duration: options.duration,
             placement: options.placement,
-            color: textColor,
-            backgroundColor: bgColor,
+            render: () => (
+                <Toast action={type}>
+                    <VStack space="xs">
+                        <ToastDescription>{options.message}</ToastDescription>
+                    </VStack>
+                </Toast>
+            ),
         })
-    }
-
-    private getColors(dto: IGetColorsDto): IGetColorsResultDto {
-        const textColor =
-            dto.type === NotificationType.INFO
-                ? 'info.400'
-                : dto.type === NotificationType.FAIL
-                    ? 'error.400'
-                    : dto.type === NotificationType.PENDING
-                        ? 'gray.400'
-                        : dto.type === NotificationType.SUCCESS
-                            ? 'success.400'
-                            : ''
-        const bgColor =
-            dto.type === NotificationType.INFO
-                ? 'info.900'
-                : dto.type === NotificationType.FAIL
-                    ? 'error.900'
-                    : dto.type === NotificationType.PENDING
-                        ? 'gray.900'
-                        : dto.type === NotificationType.SUCCESS
-                            ? 'success.900'
-                            : ''
-        return {
-            textColor,
-            bgColor,
-        }
     }
 }

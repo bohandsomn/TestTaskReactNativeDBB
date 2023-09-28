@@ -1,4 +1,4 @@
-import { useToast } from 'native-base'
+import { useToast } from '@gluestack-ui/themed'
 import { useMemo } from 'react'
 import { INotification, Notification } from '../notification'
 
