@@ -182,10 +182,12 @@ export class DropBoxFileService implements IFileService {
         const fileId = this.mapId(response.id)
         const fileName = response.title
         const filePath = response.destination
+        const fileCreated = response.created
         return {
             fileId,
             fileName,
             filePath,
+            fileCreated,
         }
     }
 
@@ -217,6 +219,7 @@ export class DropBoxFileService implements IFileService {
             fileId: this.mapId(file.id),
             fileName: file.title,
             filePath: file.destination,
+            fileCreated: file.created,
         }))
         return files
     }

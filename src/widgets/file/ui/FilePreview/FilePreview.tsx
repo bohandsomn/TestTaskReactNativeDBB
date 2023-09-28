@@ -5,9 +5,6 @@ import { FileMenu } from '../FileMenu'
 
 export const FilePreview: FC<IFilePreviewProps> = (props) => {
     return (
-        <FilePreviewEntity
-            contextMenu={<FileMenu fileId={props.fileId} />}
-            {...props}
-        />
+        <FilePreviewEntity contextMenu={<FileMenu {...props} />} {...props} />
     )
 }

@@ -1,3 +1,3 @@
-import { IDeleteFileDto } from '@/shared'
+import { IFilePreviewDto } from '@/shared'
 
-export interface IFileMenuProps extends IDeleteFileDto { }
+export interface IFileMenuProps extends Pick<IFilePreviewDto, 'fileCreated' | 'fileId'> { }
